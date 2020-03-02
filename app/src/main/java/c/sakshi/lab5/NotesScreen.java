@@ -9,18 +9,46 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.content.Context;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 
 public class NotesScreen extends AppCompatActivity {
 
     TextView welcomeMessage;
+    public static ArrayList<Note> notes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_screen);
+
+        ArrayList<String> displayNotes = new ArrayList<>();
+        for( Note note: notes )
+        {
+            displayNotes.add( String.format( "Title:%s\nDate:%s", note.getTitle(), note.getDate() ) );
+        }
+
+        ArrayAdapter adapter = new ArrayAdapter( this, android.R.layout.simple_list_item_1, displayNotes );
+        ListView listView = (ListView) findViewById( R.id.notes_list );
+        listView.setAdapter( adapter );
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                Intent intent = new Intent( getApplicationContext(), NoteEditScreen.class );
+                intent.putExtra( "noteid", position );
+                startActivity( intent );
+            }
+        });
 
         welcomeMessage = (TextView) findViewById( R.id.welcomeText );
         Intent intent = getIntent();
@@ -48,7 +76,9 @@ public class NotesScreen extends AppCompatActivity {
                 startActivity( intent );
                 return true;
             case R.id.add_note:
-
+                Intent intent2 = new Intent( this, NoteEditScreen.class );
+                startActivity( intent2 );
+                return true;
         }
 
         return true;
