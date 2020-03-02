@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.content.Context;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -24,11 +27,34 @@ public class NotesScreen extends AppCompatActivity {
 
     TextView welcomeMessage;
     public static ArrayList<Note> notes = new ArrayList<>();
+    private static Context context;
+    private static DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notes_screen);
+        context = getApplicationContext();
+        SQLiteDatabase sqLiteDatabase = context.openOrCreateDatabase( "notes", Context.MODE_PRIVATE, null );
+        dbHelper = new DBHelper( sqLiteDatabase );
+
+        //Set Welcome message
+        welcomeMessage = (TextView) findViewById( R.id.welcomeText );
+        Intent intent = getIntent();
+        String name = intent.getStringExtra("fullname" );
+        welcomeMessage.setText( "Welcome " + name );
+
+        notes = dbHelper.readNotes( name );
+
+        if( !notes.isEmpty() )
+        {
+            String theName = notes.get(0).getContent();
+            Log.i("notes", theName );
+        }
+        else
+        {
+            Log.i( "notes", "empty" );
+        }
 
         ArrayList<String> displayNotes = new ArrayList<>();
         for( Note note: notes )
@@ -44,16 +70,11 @@ public class NotesScreen extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                Intent intent = new Intent( getApplicationContext(), NoteEditScreen.class );
-                intent.putExtra( "noteid", position );
-                startActivity( intent );
+                Intent intent = new Intent(getApplicationContext(), NoteEditScreen.class);
+                intent.putExtra("noteid", position);
+                startActivity(intent);
             }
         });
-
-        welcomeMessage = (TextView) findViewById( R.id.welcomeText );
-        Intent intent = getIntent();
-        String name = intent.getStringExtra("fullname" );
-        welcomeMessage.setText( "Welcome " + name );
     }
 
     @Override

@@ -67,5 +67,10 @@ public class NoteEditScreen extends AppCompatActivity {
             title = "NOTE_" + (noteid + 1);
             dbHelper.updateNotes( title, date, content, username );
         }
+
+        //Go back to main notes screen
+        Intent intent = new Intent(this, NotesScreen.class );
+        intent.putExtra( "fullname", username );
+        startActivity( intent );
     }
 }
